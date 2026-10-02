@@ -1,0 +1,14 @@
+# ============================================================================
+# dsh-tavern —— DSH bundle patch
+# ============================================================================
+# Mounts the Tavern host plugin (character cards, world books, skills, and the
+# native DSH agent presets it registers) plus its Web settings page.
+#
+# The host row is the only entry this bundle needs: preset-scoped behaviour is
+# registered by the host plugin itself against the agents that select a Tavern
+# preset, so no per-preset child row is required.
+# ============================================================================
+
+- insert:
+    - id: tavern
+      name: dsh-tavern
