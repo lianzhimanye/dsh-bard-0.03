@@ -428,7 +428,8 @@ window.__ModuleLoader__.load({
     const EMPTY_DRAFT = {
       id: '', name: '', cardId: '', worldbookIds: [], skillNames: [],
       styleHint: '第二人称叙事，一次回复 1-3 段；对白用「」，动作与神态描写贴紧角色当下的状态与目标。',
-      extraInstructions: '', complete: false, includeRuntimeContext: true, maxEntries: 12, maxChars: 6000,
+      extraInstructions: '', complete: false, includeRuntimeContext: true,
+      enableTools: true, userName: '', maxEntries: 12, maxChars: 6000,
     }
 
     function PresetsTab(props) {
@@ -451,6 +452,8 @@ window.__ModuleLoader__.load({
           extraInstructions: preset.options.extraInstructions || '',
           complete: preset.options.complete === true,
           includeRuntimeContext: preset.options.includeRuntimeContext !== false,
+          enableTools: preset.options.enableTools !== false,
+          userName: preset.options.userName || '',
           maxEntries: Number.isFinite(preset.options.maxEntries) ? preset.options.maxEntries : 12,
           maxChars: Number.isFinite(preset.options.maxChars) ? preset.options.maxChars : 6000,
         })
@@ -512,6 +515,13 @@ window.__ModuleLoader__.load({
                 h('option', { key: '', value: '' }, '— 请选择 —'),
                 ...state.cards.map((card) => h('option', { key: card.id, value: card.id }, card.name)),
               ])),
+            h(Field, { key: 'un', label: '你的名字（角色卡里的 {{user}} 会替换成它）' },
+              h('input', {
+                style: S.input,
+                value: draft.userName,
+                placeholder: '留空则使用 User',
+                onChange: (e) => set({ userName: e.target.value }),
+              })),
           ]),
 
           h('fieldset', { key: 'wb', style: { ...S.fieldset, marginBottom: '8px' } }, [
@@ -532,6 +542,26 @@ window.__ModuleLoader__.load({
                 h('input', { type: 'checkbox', checked: draft.skillNames.includes(skill.name), onChange: () => toggle('skillNames', skill.name) }),
                 h('span', null, skill.name),
               ]))),
+          ]),
+
+          h('fieldset', { key: 'tools', style: { ...S.fieldset, marginBottom: '8px' } }, [
+            h('legend', { key: 'l', style: S.legend }, '工具调用'),
+            h('label', {
+              key: 'c',
+              style: { ...S.check, flexDirection: 'row' },
+              title: '关闭后模型请求中不会携带任何工具定义，适合纯文本模型（可避免 HTTP 400）。',
+            }, [
+              h('input', {
+                type: 'checkbox',
+                checked: draft.enableTools !== false,
+                onChange: (e) => set({ enableTools: e.target.checked }),
+              }),
+              h('span', null, '启用工具调用'),
+            ]),
+            h('div', { key: 'hint', style: { ...S.muted, marginTop: '4px' } },
+              draft.enableTools !== false
+                ? '模型可以使用文件、终端、网络等 Harness 工具。'
+                : '模型请求中不包含任何工具定义；纯文本模型请关闭此项。'),
           ]),
 
           h(Field, { key: 'sh', label: '输出风格' },
@@ -585,6 +615,8 @@ window.__ModuleLoader__.load({
                 `${preset.worldbookIds.length} 本世界书`,
                 `${preset.skillNames.length} 个技能`,
                 preset.options.complete ? '完全接管系统提示' : '',
+                preset.options.enableTools === false ? '禁用工具调用' : '',
+                preset.options.userName ? `称呼 ${preset.options.userName}` : '',
               ].filter(Boolean).join(' · ')),
               h('div', { key: 'id', style: { ...S.muted, fontFamily: 'monospace' } }, `DSH 预设 ID：${preset.dshPresetId}`),
               preset.error ? h('div', { key: 'e', style: { ...S.muted, color: 'var(--dsw-alias-state-error-primary)' } }, `注册错误：${preset.error}`) : null,

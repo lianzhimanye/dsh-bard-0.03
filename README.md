@@ -15,6 +15,8 @@
 | 关键词选择 | 世界书条目按关键词、常驻（constant）、次级门控（secondary keys）命中，停用条目跳过 |
 | 预算裁剪 | 按条数和字符双预算裁剪，且**排名最高的条目即使超预算也强制注入** |
 | 技能绑定 | 一个预设可绑定若干 Harness 技能，随 system prompt 一起生效 |
+| 工具开关 | 创建/编辑预设时可关闭工具调用；关闭后生成的预设不携带任何工具定义，适配纯文本模型 |
+| 你的名字 | 每个预设可指定 `{{user}}` 的替换值；角色卡里的 `{{char}}`、`{{user}}` 等 SillyTavern 宏会在渲染时自动替换，未知宏降级为 `[[...]]` 而不报错 |
 | 开场白 | 读取角色卡的 `first_mes` 与 `alternate_greetings`，可在界面里预览，也能用命令输出 |
 | 预设落库 | 保存为原生 agent preset，名称前缀 `tavern-`，出现在 Harness 的预设选择器里 |
 | 立绘 | 导入 PNG 卡时保留原图，界面里直接显示 |
@@ -29,6 +31,7 @@
   worldbooks/<id>.json   归一化后的世界书
   portraits/<id>.png     从 PNG 卡里保留下来的原图
   presets/<id>.json      角色卡 + 世界书 + 技能的组合
+  rendered/<presetId>.json  替换掉 {{char}}/{{user}} 后的卡快照（删预设时一并删除）
 ```
 
 写入是原子的（临时文件 + rename），崩溃不会留下半截记录。
