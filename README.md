@@ -17,6 +17,7 @@
 | 技能绑定 | 一个预设可绑定若干 Harness 技能，随 system prompt 一起生效 |
 | 工具开关 | 创建/编辑预设时可关闭工具调用；关闭后生成的预设不携带任何工具定义，适配纯文本模型 |
 | 你的名字 | 每个预设可指定 `{{user}}` 的替换值；角色卡里的 `{{char}}`、`{{user}}` 等 SillyTavern 宏会在渲染时自动替换，未知宏降级为 `[[...]]` 而不报错 |
+| 玩家性别 | 每个预设可指定玩家性别（未指定 / 男 / 女 / 自定义文本）；写进 persona 前缀的「关于玩家」段，避免模型因玩家的中性名字猜错代词 |
 | 开场白 | 读取角色卡的 `first_mes` 与 `alternate_greetings`，可在界面里预览，也能用命令输出 |
 | 预设落库 | 保存为原生 agent preset，名称前缀 `tavern-`，出现在 Harness 的预设选择器里 |
 | 立绘 | 导入 PNG 卡时保留原图，界面里直接显示 |
@@ -102,7 +103,9 @@ profile 的 `package.json` 与 `cordis.patch.yml` 都受 HMR 监视：实时 pro
 - `inject: ['webServer']`，插件名 `tavern`。
 - 把每个酒馆预设注册成原生 agent preset，名称前缀 `tavern-`，排序基址 `PRESET_ORDER_BASE = 50`（排在 Harness 自带预设之后）。
 - 预设的插件列表从 profile 当前默认 agent preset 的 `inherited.plugins` 深拷贝而来，取不到时回退到一份内置工具清单——这样酒馆预设与用户当前的默认配置保持一致。
-- 通过 `agentPresets.composedPreset(agent.ctx)` 判断某个 agent 是否正在跑酒馆预设；是则用 `systemPrompt.context({ name: 'tavern:world-book', order: 130, text })` 注入世界书。
+- 通过 `agentPresets.composedPreset(agent.ctx)` 判断某个 agent 是否正在跑酒馆预设；是则用 `agent.ctx.get('systemPrompt').context({ name: 'tavern:world-book', order: 130, text })` 注入世界书。
+- **所有服务都必须从 `agent.ctx` 获取，不能从插件的全局 `ctx` 获取。** `systemPrompt.section()` / `context()` 会把注册落到「访问服务时所用 ctx 的 scope 层」——插件 ctx 没有 scope 标签，写进去会落到全局层：第一个 agent 侥幸成功，之后每个 agent 都撞上 `already registered` 异常并被静默吞掉；而且注册的生命周期跟插件走，不跟 agent 走。`tools` 服务同样是按 scope 分的，从插件 ctx 拿只能看到内核常驻工具（`compress`、`decompress` 等），看不到 `read` / `write` / `pwsh`——所以 `agent.ctx.get('tools')` 是必须的。
+- 工具清单通过 `agent.ctx.get('systemPrompt').variable('tavern_tools', provider)` 注入，而不再是一个独立 section。原因是 section 在 DSH 里是**原子单位**：它只在顶层按 order 互相排序、再拼成 prompt 正文，没有任何接口能把文本插进某个 section 内部——清单只能在 persona 旁边，永远到不了【关于你自己】段的最后一句正下方。prompt 变量不占位置、只做替换：persona 前缀里直接写 `{{tavern_tools}}`，assemble 时 DSH 对该 section 文本逐个变量求值，引用点就被就地换成清单。变量还免疫 `complete: true` 的裁剪——该标志会丢弃除 persona 外的**所有 section**，但 persona 正文本身仍会插值，变量引用随正文一起留下。`provider` 每次请求前由 DSH 求值；`agent/created` 时 Tavern 预设尚未应用到 agent 的 ctx，任何基于 `composedPreset()` 的外层判断都会早退，因此全部逻辑都在 provider 内部。渲染结果按 preset id 缓存：provider 每轮都跑，但只有 composed preset 真正变化时才重算。世界书注入（`tavern:world-book`，order 130）同样是 thunk，且每轮重新选择条目、不缓存。
 - 注入文本取自该会话最近 `RECENT_LIMIT = 24` 条消息，截尾 8000 字符，再按世界书选择器裁剪（默认 `maxEntries = 12`、`maxChars = 6000`）。
 - 注册 `/tavern` 命令。
 - HTTP 端点挂在 `/dsh-tavern/api/` 下，并对 **loopback host + 同源 origin** 做校验（不通过返回 403），上传上限 `MAX_UPLOAD_BYTES = 12 MiB`。
