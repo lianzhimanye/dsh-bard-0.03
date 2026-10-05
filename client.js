@@ -1,24 +1,24 @@
 /**
- * dsh-tavern — Web settings page.
+ * dsh-bard — Web settings page.
  *
- * Contributes one `settings.section` entry ("酒馆") that manages everything the
+ * Contributes one `settings.section` entry ("吟游") that manages everything the
  * Host half stores: character cards, world books, the Harness skills a character
- * may use, and the Tavern presets that become native DSH agent presets.
+ * may use, and the Bard presets that become native DSH agent presets.
  *
  * Deliberately dependency-free: only `react` is required, styling uses the
  * `--dsw-alias-*` theme tokens, and every operation goes through the Host's
- * `/dsh-tavern/api/*` endpoints so the page never reimplements storage rules.
+ * `/dsh-bard/api/*` endpoints so the page never reimplements storage rules.
  */
 
 window.__ModuleLoader__.load({
-  id: 'dsh-tavern',
+  id: 'dsh-bard',
   factory(require) {
     const React = require('react')
     const h = React.createElement
 
     const { useCallback, useEffect, useMemo, useRef, useState } = React
 
-    const API = '/dsh-tavern/api'
+    const API = '/dsh-bard/api'
 
     // -----------------------------------------------------------------------
     // data access
@@ -686,7 +686,7 @@ window.__ModuleLoader__.load({
           const result = await call('/preset', draft)
           notify(result.error
             ? `预设已保存，但注册到 DSH 时出错：${result.error}`
-            : `已保存预设，DSH 预设 ID：${result.dshPresetId}。到会话的预设选择器里选「酒馆 · ${draft.name || '…'}」即可开始扮演。`,
+            : `已保存预设，DSH 预设 ID：${result.dshPresetId}。到会话的预设选择器里选「吟游 · ${draft.name || '…'}」即可开始扮演。`,
           result.error ? 'error' : 'info')
           setPreview(null)
           setDraft(EMPTY_DRAFT)
@@ -963,10 +963,10 @@ window.__ModuleLoader__.load({
         h('div', { key: 'cmd', style: S.card }, [
           h('div', { key: 't', style: S.name }, '聊天里的快捷命令'),
           h('pre', { key: 'p', style: S.pre }, [
-            '/tavern           列出所有 Tavern 预设',
-            '/tavern card      显示当前会话扮演的角色',
-            '/tavern greet     输出当前会话角色卡的开场白',
-            '/tavern greet 2   输出第 2 条开场白（备用开场白 1）',
+            '/bard           列出所有 Bard 预设',
+            '/bard card      显示当前会话扮演的角色',
+            '/bard greet     输出当前会话角色卡的开场白',
+            '/bard greet 2   输出第 2 条开场白（备用开场白 1）',
           ].join('\n')),
         ]),
       ])
@@ -983,7 +983,7 @@ window.__ModuleLoader__.load({
       { id: 'presets', label: '预设' },
     ]
 
-    function TavernSettings() {
+    function BardSettings() {
       const [state, setState] = useState(null)
       const [tab, setTab] = useState('presets')
       const [notice, setNotice] = useState(null)
@@ -1024,13 +1024,13 @@ window.__ModuleLoader__.load({
 
       if (failure) {
         return h('div', { style: S.page }, [
-          h('div', { key: 't', style: S.name }, '酒馆'),
-          h('div', { key: 'e', style: S.alert }, `读取酒馆数据失败：${failure}`),
+          h('div', { key: 't', style: S.name }, '吟游'),
+          h('div', { key: 'e', style: S.alert }, `读取吟游数据失败：${failure}`),
           h(Btn, { key: 'r', onClick: () => load() }, '重试'),
         ])
       }
       if (!state) {
-        return h('div', { style: S.page }, [h('div', { key: 'l', style: S.muted }, '正在读取酒馆数据…')])
+        return h('div', { style: S.page }, [h('div', { key: 'l', style: S.muted }, '正在读取吟游数据…')])
       }
 
       const common = { state, reload, notify }
@@ -1038,7 +1038,7 @@ window.__ModuleLoader__.load({
       return h('div', { style: S.page }, [
         h('div', { key: 'head', style: S.between }, [
           h('div', { key: 'l' }, [
-            h('div', { key: 't', style: { ...S.name, fontSize: '15px' } }, '酒馆'),
+            h('div', { key: 't', style: { ...S.name, fontSize: '15px' } }, '吟游'),
             h('div', { key: 's', style: S.muted }, '导入角色卡与世界书，挂上技能，保存成 DSH 预设后即可开始角色扮演。'),
           ]),
           h('div', { key: 'r', style: S.row }, [
@@ -1076,8 +1076,8 @@ window.__ModuleLoader__.load({
       inject: ['slots'],
       apply(ctx) {
         ctx.slots.inject('settings.section', () => ctx.slots.register(
-          { name: 'settings.section', id: 'tavern', order: 25, label: '酒馆' },
-          TavernSettings,
+          { name: 'settings.section', id: 'bard', order: 25, label: '吟游' },
+          BardSettings,
         ))
       },
     }

@@ -1,8 +1,8 @@
 {
-  "title": "Tavern",
+  "title": "Bard",
   "description": "Import SillyTavern character cards and world books, attach DSH skills to a character, save the combination as a native DSH agent preset, and emit the card's opening text.",
   "meta": {
-    "title": "Tavern",
+    "title": "Bard",
     "description": "Import SillyTavern character cards and world books, attach DSH skills to a character, save the combination as a native DSH agent preset, and emit the card's opening text."
   }
 }

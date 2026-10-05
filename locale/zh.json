@@ -1,8 +1,8 @@
 {
-  "title": "酒馆（Tavern）",
+  "title": "吟游（Bard）",
   "description": "导入 SillyTavern 角色卡与世界书，为角色挂载 DSH 技能，并保存成原生 DSH Agent 预设；支持输出角色卡开场白。",
   "meta": {
-    "title": "酒馆（Tavern）",
+    "title": "吟游（Bard）",
     "description": "导入 SillyTavern 角色卡与世界书，为角色挂载 DSH 技能，并保存成原生 DSH Agent 预设；支持输出角色卡开场白。"
   }
 }
