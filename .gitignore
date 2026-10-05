@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 .pnpm-store/
 .dsh/
 tavern/
@@ -19,3 +19,4 @@ Thumbs.db
 .env
 .env.local
 update.ps1
+.tavern-*.mjs
